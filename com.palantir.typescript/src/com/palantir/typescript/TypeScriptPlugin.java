@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.palantir.typescript;
 
 import java.io.File;
 import java.util.List;
 import java.util.Set;
-
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
@@ -29,7 +27,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.osgi.framework.BundleContext;
-
 import com.google.common.base.Splitter;
 import com.google.common.base.StandardSystemProperty;
 import com.google.common.collect.Lists;
@@ -52,49 +49,45 @@ public final class TypeScriptPlugin extends AbstractUIPlugin {
     public static final String ID = "com.palantir.typescript";
 
     private static final String OS_NAME = StandardSystemProperty.OS_NAME.value();
+
     private static final Splitter PATH_SPLITTER = Splitter.on(File.pathSeparatorChar);
 
     private static TypeScriptPlugin PLUGIN;
 
     private LanguageEndpoint builderLanguageEndpoint;
+
     private Classifier classifier;
+
     private LanguageEndpoint editorLanguageEndpoint;
+
     private LanguageEndpoint reconcilerLanguageEndpoint;
+
     private MyResourceChangeListener resourceChangeListener;
 
     @Override
     public void start(BundleContext context) throws Exception {
         super.start(context);
-
         PLUGIN = this;
-
         this.resourceChangeListener = new MyResourceChangeListener();
-
         ResourcesPlugin.getWorkspace().addResourceChangeListener(this.resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
         ResourcesPlugin.getWorkspace().removeResourceChangeListener(this.resourceChangeListener);
-
         if (this.builderLanguageEndpoint != null) {
             this.builderLanguageEndpoint.dispose();
         }
-
         if (this.classifier != null) {
             this.classifier.dispose();
         }
-
         if (this.editorLanguageEndpoint != null) {
             this.editorLanguageEndpoint.dispose();
         }
-
         if (this.reconcilerLanguageEndpoint != null) {
             this.reconcilerLanguageEndpoint.dispose();
         }
-
         PLUGIN = null;
-
         super.stop(context);
     }
 
@@ -116,7 +109,6 @@ public final class TypeScriptPlugin extends AbstractUIPlugin {
         if (this.builderLanguageEndpoint == null) {
             this.builderLanguageEndpoint = new LanguageEndpoint("LANGUAGE-BUILDER");
         }
-
         return this.builderLanguageEndpoint;
     }
 
@@ -124,7 +116,6 @@ public final class TypeScriptPlugin extends AbstractUIPlugin {
         if (this.classifier == null) {
             this.classifier = new Classifier("CLASSIFIER");
         }
-
         return this.classifier;
     }
 
@@ -132,7 +123,6 @@ public final class TypeScriptPlugin extends AbstractUIPlugin {
         if (this.editorLanguageEndpoint == null) {
             this.editorLanguageEndpoint = new LanguageEndpoint("LANGUAGE-EDITOR");
         }
-
         return this.editorLanguageEndpoint;
     }
 
@@ -140,29 +130,28 @@ public final class TypeScriptPlugin extends AbstractUIPlugin {
         if (this.reconcilerLanguageEndpoint == null) {
             this.reconcilerLanguageEndpoint = new LanguageEndpoint("LANGUAGE-RECONCILER");
         }
-
         return this.reconcilerLanguageEndpoint;
     }
 
     @Override
     protected void initializeDefaultPluginPreferences() {
         IPreferenceStore store = TypeScriptPlugin.getDefault().getPreferenceStore();
-
         store.setDefault(IPreferenceConstants.COMPILER_COMPILE_ON_SAVE, false);
         store.setDefault(IPreferenceConstants.COMPILER_DECLARATION, false);
+        store.setDefault(IPreferenceConstants.COMPILER_INLINE_SOURCE_MAP, false);
+        store.setDefault(IPreferenceConstants.COMPILER_INLINE_SOURCES, false);
         store.setDefault(IPreferenceConstants.COMPILER_JSX, JsxEmit.NONE.toString());
         store.setDefault(IPreferenceConstants.COMPILER_MODULE, ModuleKind.NONE.toString());
         store.setDefault(IPreferenceConstants.COMPILER_NO_IMPLICIT_ANY, false);
         store.setDefault(IPreferenceConstants.COMPILER_NO_LIB, false);
         store.setDefault(IPreferenceConstants.COMPILER_REMOVE_COMMENTS, false);
         store.setDefault(IPreferenceConstants.COMPILER_SOURCE_MAP, false);
+        store.setDefault(IPreferenceConstants.COMPILER_SUPPRESS_EXCESS_PROPERTY_ERRORS, false);
         store.setDefault(IPreferenceConstants.COMPILER_SUPPRESS_IMPLICIT_ANY_INDEX_ERRORS, false);
         store.setDefault(IPreferenceConstants.COMPILER_TARGET, ScriptTarget.ECMASCRIPT5.toString());
-
         store.setDefault(IPreferenceConstants.CONTENT_ASSIST_AUTO_ACTIVATION_DELAY, 200);
         store.setDefault(IPreferenceConstants.CONTENT_ASSIST_AUTO_ACTIVATION_ENABLED, true);
         store.setDefault(IPreferenceConstants.CONTENT_ASSIST_AUTO_ACTIVATION_TRIGGERS, ".");
-
         store.setDefault(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SPACES_FOR_TABS, true);
         store.setDefault(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH, 4);
         store.setDefault(IPreferenceConstants.EDITOR_CLOSE_BRACES, false);
@@ -171,7 +160,6 @@ public final class TypeScriptPlugin extends AbstractUIPlugin {
         store.setDefault(IPreferenceConstants.EDITOR_INDENT_STYLE, IndentStyle.SMART.toString());
         store.setDefault(IPreferenceConstants.EDITOR_MATCHING_BRACKETS, true);
         store.setDefault(IPreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, "128,128,128");
-
         store.setDefault(IPreferenceConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_DELIMITER, true);
         store.setDefault(IPreferenceConstants.FORMATTER_INSERT_SPACE_AFTER_FUNCTION_KEYWORD_FOR_ANONYMOUS_FUNCTIONS, false);
         store.setDefault(IPreferenceConstants.FORMATTER_INSERT_SPACE_AFTER_KEYWORDS_IN_CONTROL_FLOW_STATEMENTS, true);
@@ -180,9 +168,7 @@ public final class TypeScriptPlugin extends AbstractUIPlugin {
         store.setDefault(IPreferenceConstants.FORMATTER_INSERT_SPACE_BEFORE_AND_AFTER_BINARY_OPERATORS, true);
         store.setDefault(IPreferenceConstants.FORMATTER_PLACE_OPEN_BRACE_ON_NEW_LINE_FOR_CONTROL_BLOCKS, false);
         store.setDefault(IPreferenceConstants.FORMATTER_PLACE_OPEN_BRACE_ON_NEW_LINE_FOR_FUNCTIONS, false);
-
         store.setDefault(IPreferenceConstants.GENERAL_NODE_PATH, findNodejs());
-
         store.setDefault(IPreferenceConstants.SYNTAX_COLORING_COMMENT_COLOR, "63,127,95");
         store.setDefault(IPreferenceConstants.SYNTAX_COLORING_IDENTIFIER_COLOR, "0,0,0");
         store.setDefault(IPreferenceConstants.SYNTAX_COLORING_KEYWORD_COLOR, "127,0,85");
@@ -197,21 +183,17 @@ public final class TypeScriptPlugin extends AbstractUIPlugin {
         String nodeFileName = getNodeFileName();
         String path = System.getenv("PATH");
         List<String> directories = Lists.newArrayList(PATH_SPLITTER.split(path));
-
         // ensure /usr/local/bin is included for OS X
         if (OS_NAME.startsWith("Mac OS X")) {
             directories.add("/usr/local/bin");
         }
-
         // search for Node.js in the PATH directories
         for (String directory : directories) {
             File nodeFile = new File(directory, nodeFileName);
-
             if (nodeFile.exists()) {
                 return nodeFile.getAbsolutePath();
             }
         }
-
         return "";
     }
 
@@ -219,20 +201,18 @@ public final class TypeScriptPlugin extends AbstractUIPlugin {
         if (OS_NAME.startsWith("Windows")) {
             return "node.exe";
         }
-
         return "node";
     }
 
     private final class MyResourceChangeListener implements IResourceChangeListener {
+
         @Override
         public void resourceChanged(IResourceChangeEvent event) {
             IResourceDelta delta = event.getDelta();
             Set<FileDelta> fileDeltas = TypeScriptProjects.getFileDeltas(Folders.SOURCE_AND_EXPORTED, delta);
-
             if (TypeScriptPlugin.this.editorLanguageEndpoint != null) {
                 TypeScriptPlugin.this.editorLanguageEndpoint.updateFiles(fileDeltas);
             }
-
             if (TypeScriptPlugin.this.reconcilerLanguageEndpoint != null) {
                 TypeScriptPlugin.this.reconcilerLanguageEndpoint.updateFiles(fileDeltas);
             }

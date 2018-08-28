@@ -13,15 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.palantir.typescript.services.language;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.preference.IPreferenceStore;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Strings;
 import com.palantir.typescript.EclipseResources;
@@ -163,13 +160,13 @@ public final class CompilerOptions {
 
     public static CompilerOptions fromProject(IProject project) {
         checkNotNull(project);
-
         IPreferenceStore preferenceStore = new ProjectPreferenceStore(project);
-
         // create the compilation settings from the preferences
         CompilerOptions compilationSettings = new CompilerOptions();
         compilationSettings.declaration = preferenceStore.getBoolean(IPreferenceConstants.COMPILER_DECLARATION);
         compilationSettings.experimentalDecorators = preferenceStore.getBoolean(IPreferenceConstants.COMPILER_EXPERIMENTAL_DECORATORS);
+        compilationSettings.inlineSourceMap = preferenceStore.getBoolean(IPreferenceConstants.COMPILER_INLINE_SOURCE_MAP);
+        compilationSettings.inlineSources = preferenceStore.getBoolean(IPreferenceConstants.COMPILER_INLINE_SOURCES);
         compilationSettings.jsx = JsxEmit.valueOf(preferenceStore.getString(IPreferenceConstants.COMPILER_JSX));
         compilationSettings.module = ModuleKind.parse(preferenceStore.getString(IPreferenceConstants.COMPILER_MODULE));
         compilationSettings.moduleResolution = ModuleResolutionKind.CLASSIC;
@@ -178,32 +175,26 @@ public final class CompilerOptions {
         compilationSettings.noLib = preferenceStore.getBoolean(IPreferenceConstants.COMPILER_NO_LIB);
         compilationSettings.removeComments = preferenceStore.getBoolean(IPreferenceConstants.COMPILER_REMOVE_COMMENTS);
         compilationSettings.sourceMap = preferenceStore.getBoolean(IPreferenceConstants.COMPILER_SOURCE_MAP);
-        compilationSettings.suppressImplicitAnyIndexErrors = preferenceStore
-            .getBoolean(IPreferenceConstants.COMPILER_SUPPRESS_IMPLICIT_ANY_INDEX_ERRORS);
+        compilationSettings.suppressExcessPropertyErrors = preferenceStore.getBoolean(IPreferenceConstants.COMPILER_SUPPRESS_EXCESS_PROPERTY_ERRORS);
+        compilationSettings.suppressImplicitAnyIndexErrors = preferenceStore.getBoolean(IPreferenceConstants.COMPILER_SUPPRESS_IMPLICIT_ANY_INDEX_ERRORS);
         compilationSettings.target = ScriptTarget.valueOf(preferenceStore.getString(IPreferenceConstants.COMPILER_TARGET));
-
         // set the output directory or file if it was specified
         String outDir = preferenceStore.getString(IPreferenceConstants.COMPILER_OUT_DIR);
         String outFile = preferenceStore.getString(IPreferenceConstants.COMPILER_OUT_FILE);
-
         // get the eclipse name for the output directory
         String outputFolderName = null;
         if (!Strings.isNullOrEmpty(outDir)) {
             IFolder outputFolder = project.getFolder(outDir);
-
             outputFolderName = EclipseResources.getContainerName(outputFolder);
         }
-
         if (!Strings.isNullOrEmpty(outFile)) {
             if (outputFolderName == null) {
                 outputFolderName = EclipseResources.getContainerName(project);
             }
-
             compilationSettings.out = outputFolderName + outFile;
         } else if (outputFolderName != null) {
             compilationSettings.outDir = outputFolderName;
         }
-
         return compilationSettings;
     }
 }
